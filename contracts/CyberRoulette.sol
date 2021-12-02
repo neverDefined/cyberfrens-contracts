@@ -1,19 +1,23 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
 contract CyberRoulette {
   enum BetType {
     Color,
     Number
   }
 
+  /**
+     @dev choice: interpretation is based on BetType
+     BetType.Color: 0=black, 1=red
+     BetType.Number: -1=00, 0-36 for individual numbers
+     */
+
   struct Bet {
     address user;
     uint256 amount;
     BetType betType;
     uint256 block;
-    /**
-     @dev choice: interpretation is based on BetType
-     BetType.Color: 0=black, 1=red
-     BetType.Number: -1=00, 0-36 for individual numbers
-     */
     int256 choice;
   }
 
