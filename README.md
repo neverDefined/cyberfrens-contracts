@@ -1,4 +1,4 @@
-# cyberfrens-satoshis-dice
+# cyberfrens-contracts
 Using Hardhat Framework for compiling + testing.
 Tests written in TS. 
 
