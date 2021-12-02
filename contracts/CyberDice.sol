@@ -34,7 +34,7 @@ contract CyberDice {
 
   function roll(uint256 id) public {
     require(msg.sender == bets[id].user, 'Roller Must have set Bet');
-    require(block.number >= bets[id].block, 'Cant Roll Before Bet');
+    require(block.number >= bets[id].block, 'Cant Roll Before 3 Block Wait');
     require(block.number <= bets[id].block + 255, 'Too Late');
 
     bytes32 random = keccak256(abi.encodePacked(blockhash(bets[id].block), id));
