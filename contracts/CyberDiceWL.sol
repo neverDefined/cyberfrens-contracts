@@ -129,7 +129,7 @@ contract CyberDiceWL {
     if (rolled < bets[id].cap) {
       uint256 whitelistPayout = winningAmounts[uint256(bets[id].risk)];
 
-      if (maximumNumberOfWL < maximumNumberOfWL + whitelistPayout) {
+      if (maximumNumberOfWL < whitelistedCounter + whitelistPayout) {
         uint256 wlSpotsLeft = maximumNumberOfWL - whitelistedCounter;
         whitelistPayout = wlSpotsLeft;
       }
