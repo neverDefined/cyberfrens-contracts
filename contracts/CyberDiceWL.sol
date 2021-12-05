@@ -55,7 +55,7 @@ contract CyberDiceWL {
    */
   uint256 public constant MAXIMUM_CAP = 100;
 
-  uint256[] timePeriodsBlockTimes = [
+  uint256[] public timePeriodsBlockTimes = [
     gameStartedBlockTimeStamp + 1 days,
     gameStartedBlockTimeStamp + 2 days
   ];
@@ -66,23 +66,24 @@ contract CyberDiceWL {
    */
 
   uint256[] public odds = [30, 10, 2];
-  uint256[] winningAmounts = [1, 5, 10];
-  uint256[] lateTaxes = [0 ether, 0.002 ether, 0.004 ether];
-  uint256[] riskTaxes = [0.008 ether, 0.005 ether, 0.001 ether];
-  uint256 maximumNumberOfWL = 200;
-  uint256 whitelistedCounter = 0;
+  uint256[] public winningAmounts = [1, 5, 10];
+  uint256[] public lateTaxes = [0 ether, 0.002 ether, 0.004 ether];
+  uint256[] public riskTaxes = [0.008 ether, 0.005 ether, 0.001 ether];
+  uint256 public maximumNumberOfWL;
+  uint256 public whitelistedCounter = 0;
 
-  constructor() {
+  constructor(uint256 _maximumNumberOfWL) {
     admin = msg.sender;
     gameStartedBlockTimeStamp = block.timestamp;
+    maximumNumberOfWL = _maximumNumberOfWL;
   }
 
   function getCurrentTimePeriod() public view returns (TimePeriod timePeriod) {
-    if (block.timestamp < timePeriodsBlockTimes[0]) {
+    if (block.timestamp <= gameStartedBlockTimeStamp + 3600) {
       return TimePeriod.early;
     }
 
-    if (block.timestamp < timePeriodsBlockTimes[1]) {
+    if (block.timestamp <= gameStartedBlockTimeStamp + 7400) {
       return TimePeriod.med;
     }
 
@@ -112,7 +113,7 @@ contract CyberDiceWL {
     );
   }
 
-  function roll(uint256 id) public returns (bool isSuccess) {
+  function roll(uint256 id) public returns (uint256) {
     require(whitelistedCounter < maximumNumberOfWL, 'WL SPOTS ALL WON');
     require(msg.sender == bets[id].user, 'ROLLER MUST HAVE SET BET');
     require(
@@ -136,10 +137,9 @@ contract CyberDiceWL {
       winnings[msg.sender] = winnings[msg.sender] + whitelistPayout;
 
       emit Roll(id, bets[id].cap, rolled, whitelistPayout);
-      return true;
     }
 
     emit Roll(id, bets[id].cap, rolled, 0);
-    return false;
+    return rolled;
   }
 }
