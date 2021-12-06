@@ -48,7 +48,7 @@ contract CyberDiceWL {
   uint256 counter = 0;
   uint256 blockNumber = 0;
   mapping(uint256 => Bet) public bets;
-  mapping(address => uint256) winnings;
+  mapping(address => uint256) public winnings;
 
   /**
     @dev game parameters
