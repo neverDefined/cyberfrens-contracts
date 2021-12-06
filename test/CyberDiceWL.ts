@@ -28,8 +28,60 @@ const mineBlocks = async (numberOfBlocks: number) => {
     await network.provider.send('evm_mine')
     currentBlock = await ethers.provider.getBlockNumber()
   }
+}
 
-  console.log(`mined ${targetBlock - startingBlock}, blocks`)
+const betAndRoll = async (
+  riskLevel: number,
+  contract: CyberDiceWL,
+  player: SignerWithAddress,
+) => {
+  const betPrice = await checkExpectedPrice(riskLevel, 0, contract)
+  const betPriceInWei = ethers.utils.parseEther(betPrice.toString())
+  const betTx = await contract.connect(player).placeBet(riskLevel, { value: betPriceInWei })
+
+  const betReceipt = await betTx.wait()
+  const betEvent = betReceipt.events![0].args!
+  const betID = betEvent[0].toNumber()
+
+  await mineBlocks(4)
+  const rollTx = await contract.connect(player).roll(betID)
+  const rollReceipt = await rollTx.wait()
+  const rollEvent = rollReceipt.events![0].args!
+  const cap = rollEvent[1] as BigNumber
+  const rolled = rollEvent[2] as BigNumber
+  const winnings = rollEvent[3] as BigNumber
+
+  if (cap.toNumber() >= rolled.toNumber()) {
+    console.log('won bet, bet:', cap.toNumber(), ' rolled', rolled.toNumber())
+    return true
+  }
+  return false
+}
+
+const rollTillWin = async (
+  riskLevel: number,
+  contract: CyberDiceWL,
+  player: SignerWithAddress,
+) => {
+  let won = false
+  while (won === false) {
+    const wonGame = await betAndRoll(riskLevel, contract, player)
+    won = wonGame
+  }
+}
+
+const BetAndRollTillNumberOfWins = async (
+  riskLevel: number,
+  contract: CyberDiceWL,
+  player: SignerWithAddress,
+  numberOfWins: number,
+) => {
+  let numberOfWinsAccrued = 0
+
+  while (numberOfWinsAccrued < numberOfWins) {
+    await rollTillWin(riskLevel, contract, player)
+    numberOfWinsAccrued++
+  }
 }
 
 const checkExpectedPrice = async (
@@ -136,6 +188,11 @@ describe('CyberDiceWL.sol', async () => {
     expect(contract.connect(player).roll(1)).to.revertedWith(
       'CANT ROLL BEFORE 3 BLOCKS SINCE BET',
     )
+  })
+
+  it('should fail if already out of WL spots', async () => {
+    await BetAndRollTillNumberOfWins(0, contract, player, 2)
+    expect(rollTillWin(0, contract, player)).to.revertedWith('WL SPOTS ALL WON')
   })
 
   it('roll should fail if 259 blocks since bet', async () => {
