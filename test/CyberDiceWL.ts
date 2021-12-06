@@ -158,6 +158,13 @@ describe('CyberDiceWL.sol', async () => {
     await checkExpectedPrice(2, 2, contract)
   })
 
+  it('roller still gets rewards even if their bet payout > wl left', async () => {
+    await BetAndRollTillNumberOfWins(0, contract, player, 1)
+    await BetAndRollTillNumberOfWins(2, contract, player, 1)
+    const playerWL = (await contract.winnings(player.address)).toNumber()
+    expect(playerWL).to.equal(2)
+  })
+
   it('fails when placing bet with less than price', async () => {
     const price = await checkExpectedPrice(0, 0, contract)
     const smallerThanPriceNum = 0.007
