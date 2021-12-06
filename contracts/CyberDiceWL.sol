@@ -134,6 +134,7 @@ contract CyberDiceWL {
         whitelistPayout = wlSpotsLeft;
       }
 
+      whitelistedCounter = whitelistedCounter + whitelistPayout;
       winnings[msg.sender] = winnings[msg.sender] + whitelistPayout;
 
       emit Roll(id, bets[id].cap, rolled, whitelistPayout);
