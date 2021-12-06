@@ -51,10 +51,7 @@ const betAndRoll = async (
   const rolled = rollEvent[2] as BigNumber
   const winnings = rollEvent[3] as BigNumber
 
-  if (cap.toNumber() >= rolled.toNumber()) {
-    console.log('won bet, bet:', cap.toNumber(), ' rolled', rolled.toNumber())
-    return true
-  }
+  if (cap.toNumber() >= rolled.toNumber()) return true
   return false
 }
 
